@@ -79,7 +79,21 @@ docker compose up --build
 
 ### Pruebas E2E (Playwright)
 ```bash
-npx playwright test
+npm run test:e2e
+```
+
+### Stress test automatizado (Playwright)
+Por defecto ejecuta escenarios de 10, 20 y 30 usuarios concurrentes contra el deploy de Vercel (`https://nutriscone-fyo2.vercel.app`). Cada usuario que logra entrar a la encuesta envía respuestas aleatorias y el comentario final `esto es una prueba`, por lo que el dashboard desplegado debería sumar registros reales:
+
+```bash
+npm run test:stress
+```
+
+Variables útiles:
+
+```bash
+STRESS_USER_STEPS=10,20,30,40,50 npm run test:stress
+STRESS_READY_TIMEOUT_MS=60000 npm run test:stress
 ```
 
 ### Pruebas de Carga (k6)

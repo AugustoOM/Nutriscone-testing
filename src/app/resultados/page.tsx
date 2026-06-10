@@ -39,10 +39,14 @@ export default function Resultados() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState('');
+  const [fetchError, setFetchError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === 'nutriscone2026') {
+    const form = e.currentTarget as HTMLFormElement;
+    const password = String(new FormData(form).get('password') ?? '');
+
+    if (password === 'nutriscone2026') {
       setIsAuthenticated(true);
       setAuthError('');
     } else {
@@ -54,12 +58,18 @@ export default function Resultados() {
     if (!isAuthenticated) return;
 
     const fetchData = async () => {
+      setLoading(true);
+      setFetchError('');
+
       const { data: responses, error } = await supabase
         .from('survey_responses')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching data:', error);
+        setData([]);
+        setFetchError(error.message || 'No se pudieron cargar los resultados.');
       } else {
         setData(responses as SurveyResponse[]);
       }
@@ -98,6 +108,7 @@ export default function Resultados() {
             <div>
               <input
                 type="password"
+                name="password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 placeholder="Contraseña"
@@ -126,6 +137,33 @@ export default function Resultados() {
     return (
       <div className="min-h-screen bg-[#FBF4E4] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-screen bg-[#FBF4E4] flex flex-col items-center justify-center p-4">
+        <div
+          role="alert"
+          className="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full border border-rose-200 text-center"
+        >
+          <h2 className="text-2xl font-bold text-slate-800">No se pudieron cargar los resultados</h2>
+          <p className="text-slate-600 mt-3">
+            Revisá que las variables de Supabase estén configuradas y que la tabla permita lectura pública para el dashboard.
+          </p>
+          <p className="text-sm text-rose-600 mt-4 break-words">{fetchError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setFetchError('');
+              setIsAuthenticated(false);
+            }}
+            className="mt-6 btn-brand btn-hover-opacity py-3 px-5 rounded-xl transition-colors shadow-md font-bold"
+          >
+            Volver a intentar
+          </button>
+        </div>
       </div>
     );
   }
@@ -324,7 +362,7 @@ export default function Resultados() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {comentariosList.map((comentario, index) => (
                 <div key={index} className="bg-white rounded-2xl p-6 border border-[#C4B687]/40 shadow-sm relative">
-                  <div className="text-6xl text-brand absolute -top-2 left-2 font-serif opacity-20">"</div>
+                  <div className="text-6xl text-brand absolute -top-2 left-2 font-serif opacity-20">&quot;</div>
                   <p className="text-slate-700 italic relative z-10 pt-4 leading-relaxed">{comentario}</p>
                 </div>
               ))}

@@ -15,6 +15,15 @@ const QUESTIONS = [
   { id: 'aceptacion_global', label: '7. ¿Cómo considera la aceptación global del producto?', scale: ['Me disgusta mucho', 'Me disgusta', 'Ni me gusta ni me disgusta', 'Me gusta', 'Me gusta mucho'] },
 ];
 
+function isPresenceUserState(value: unknown): value is { online_at: string } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'online_at' in value &&
+    typeof value.online_at === 'string'
+  );
+}
+
 export default function Encuesta() {
   const [formData, setFormData] = useState<Record<string, number | null | boolean | string>>({
     color: null,
@@ -34,7 +43,7 @@ export default function Encuesta() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const router = useRouter();
 
-  const MAX_USERS = 30; // TEMPORAL: Puesto en 0 para forzar la sala de espera
+  const QUEUE_THRESHOLD_USERS = 30;
   const [isConnecting, setIsConnecting] = useState<boolean>(true);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const [activeUsersCount, setActiveUsersCount] = useState<number>(0);
@@ -110,9 +119,9 @@ export default function Encuesta() {
 
         for (const id in state) {
           count++;
-          // @ts-ignore
-          const userState = state[id][0] as any;
-          if (userState && userState.online_at) {
+          const entries = state[id] as unknown;
+          const userState = Array.isArray(entries) ? entries[0] : undefined;
+          if (isPresenceUserState(userState)) {
             users.push({ id, online_at: userState.online_at });
           }
         }
@@ -122,7 +131,7 @@ export default function Encuesta() {
 
         const myIndex = users.findIndex(u => u.id === userId);
         if (myIndex !== -1) {
-          setIsWaiting(myIndex >= MAX_USERS);
+          setIsWaiting(myIndex >= QUEUE_THRESHOLD_USERS - 1);
           setIsConnecting(false);
         }
       })
@@ -150,7 +159,7 @@ export default function Encuesta() {
     );
   }
 
-  if (isConnecting && status !== 'success') {
+  if (isConnecting) {
     return (
       <div className="min-h-screen bg-[#FBF4E4] flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#E2864A]"></div>
@@ -158,16 +167,23 @@ export default function Encuesta() {
     );
   }
 
-  if (isWaiting && status !== 'success') {
+  if (isWaiting) {
     return (
       <div className="min-h-screen bg-[#FBF4E4] py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-        <div className="max-w-md w-full text-center bg-white rounded-3xl shadow-xl p-10 border border-[#C4B687]/40">
+        <div
+          role="alert"
+          aria-live="assertive"
+          aria-label="Usuario en cola por alta concurrencia"
+          data-testid="queue-alert"
+          className="max-w-md w-full text-center bg-white rounded-3xl shadow-xl p-10 border border-[#C4B687]/40"
+        >
           <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand/20 animate-pulse">
             <span className="text-4xl">⏳</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-[#7B5434] mb-4">Estamos recibiendo muchas respuestas</h2>
+          <p className="text-sm font-bold uppercase tracking-wider text-[#E2864A] mb-3">Usuario en cola</p>
+          <h2 className="text-3xl font-extrabold text-[#7B5434] mb-4">Te encuentras en cola</h2>
           <p className="text-lg text-slate-600 mb-6">
-            Para garantizar la mejor experiencia, hemos habilitado una sala de espera.
+            Estamos recibiendo muchas respuestas simultáneas. Para garantizar la mejor experiencia, hemos habilitado una sala de espera.
           </p>
           <div className="bg-[#FBF4E4] rounded-2xl p-6 border border-[#C4B687]/30">
             <p className="text-slate-800 font-bold mb-2">Por favor, no cierres esta pestaña.</p>
