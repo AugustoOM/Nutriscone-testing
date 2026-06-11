@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FiInbox, FiChevronLeft } from 'react-icons/fi';
+import { LockKeyhole } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 
 import { Bar, Pie } from 'react-chartjs-2';
@@ -99,7 +100,7 @@ export default function Resultados() {
         <div className="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full border border-slate-100">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-brand/20">
-              <span className="text-2xl text-brand">🔒</span>
+              <LockKeyhole className="w-8 h-8 text-brand" aria-hidden="true" />
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Acceso Restringido</h1>
             <p className="text-slate-500">Ingresa la contraseña para ver los resultados</p>
