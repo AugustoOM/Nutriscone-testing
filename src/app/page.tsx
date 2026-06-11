@@ -16,11 +16,11 @@ export default function Home() {
       </header>
 
       <main className="flex flex-1 w-full max-w-4xl flex-col items-center justify-center py-10 text-center">
-        <div className="w-full">
+        <div className="mb-8 inline-flex rounded-lg border-4 border-[#7B5434] bg-white p-3 shadow-xl shadow-[#7B5434]/20">
           <img
             src="/logo_Nutriscone.jpeg"
             alt="Nutriscone Logo"
-            className="mx-auto mb-8 max-h-56 w-auto rounded-3xl shadow-2xl"
+            className="max-h-72 w-auto rounded-md sm:max-h-80"
             onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/logo.svg'; }}
           />
         </div>
@@ -36,7 +36,7 @@ export default function Home() {
 
         <div className="w-full max-w-xl">
           <h1 className="mb-4 text-4xl font-black tracking-normal text-slate-900 sm:text-5xl">
-            Encuesta Nutriscone
+            Encuesta de satisfacción
           </h1>
           <p className="mx-auto mb-8 max-w-md text-lg text-slate-600">
             Evaluación rápida de los scones de garbanzo.
